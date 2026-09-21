@@ -1,0 +1,1 @@
+老師用 AI 做的教學小遊戲。Math Knight 改編自 Chris de Villiers 設計的桌遊，僅供教學使用。

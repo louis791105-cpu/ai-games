@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密室逃脫：時間的鎖匙 V8 最終版</title>
+    <style>
+        :root {
+            --bg-color: #05070a;
+            --panel-bg: #111827;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --success-color: #22c55e;
+            --border-color: #1f2937;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        
+        #game-container { width: 100%; max-width: 900px; background: var(--panel-bg); border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); border: 1px solid var(--border-color); overflow: hidden; display: flex; flex-direction: column; }
+        header { background-color: #030712; padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.2rem; color: var(--accent-color); letter-spacing: 2px; }
+
+        #screen-manager { padding: 30px; min-height: 480px; display: flex; flex-direction: column; justify-content: center; }
+        .screen { display: none; animation: fadeIn 0.5s ease forwards; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .story-text { font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; color: #cbd5e1; }
+        .hint-box { background: #030712; border-left: 4px solid var(--accent-color); padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 0.95rem; }
+
+        .btn { background: var(--accent-color); color: #030712; border: none; padding: 12px 24px; font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; text-align: center; }
+        .btn:hover { background: #0ea5e9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
+        .btn-secondary { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-right: 10px; }
+
+        .room-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .clickable-object { background: #030712; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .clickable-object:hover { border-color: var(--accent-color); transform: translateY(-3px); }
+        .clickable-object .icon { font-size: 2rem; margin-bottom: 10px; }
+        
+        #inventory-bar { background: #030712; padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
+        .inventory-title { font-size: 0.85rem; font-weight: bold; color: var(--text-muted); }
+        .inv-item { background: #1f2937; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; display: flex; gap: 5px; animation: pop 0.3s ease; }
+        @keyframes pop { from { transform: scale(0.8); } to { transform: scale(1); } }
+
+        /* 水平切線七段顯示器樣式 */
+        .canvas-area { width: 100%; background: #020617; border-radius: 12px; padding: 30px; position: relative; border: 1px solid #1e293b; overflow: hidden; margin-bottom: 20px; }
+        .canvas-area::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%); opacity: 0.5; }
+        
+        .svg-container { position: relative; width: 100%; height: 200px; z-index: 2; }
+        .digit-segment { stroke: #38bdf8; stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 8px #0ea5e9); }
+        .cut-line { stroke: #ef4444; stroke-width: 2; stroke-dasharray: 8,6; opacity: 0.8; }
+
+        .code-lock-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .lock-display { background: #000; color: #22c55e; font-family: monospace; font-size: 2.5rem; padding: 10px 30px; border-radius: 8px; letter-spacing: 10px; border: 2px solid #1f2937; box-shadow: inset 0 0 15px rgba(34,197,94,0.2); }
+        .keyboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key { background: #030712; border: 1px solid #1f2937; color: white; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; }
+
+        .doors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .door { background: #030712; border: 2px solid #1f2937; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .door:hover { border-color: white; transform: scale(1.02); }
+        .door-time { font-size: 2rem; font-weight: bold; font-family: monospace; margin-bottom: 10px; }
+
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 15px 30px; border-radius: 8px; z-index: 1000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header>
+            <h1>TIME ESCAPE</h1>
+            <div id="game-status">狀態：探索中</div>
+        </header>
+
+        <div id="screen-manager">
+            
+            <div id="screen-intro" class="screen active">
+                <p class="story-text">你一覺醒來發現自己被關在一個房間，四周充滿神祕儀器的嗡鳴聲。大門緊閉，牆上留有一行字：「門，只有在正確的時間才能打開。」</p>
+                <div class="hint-box">提示：仔細搜索房間裡的四個角落，解開層層謎題逃出生天。</div>
+                <div style="text-align: right;"><button class="btn" onclick="goToScreen('screen-main')">進入房間</button></div>
+            </div>
+
+            <div id="screen-main" class="screen">
+                <div class="room-grid">
+                    <div class="clickable-object" onclick="goToScreen('screen-potions')"><div class="icon">🧪</div><div class="title">藥水桌子</div><div id="status-potions">未解決</div></div>
+                    <div class="clickable-object" onclick="goToScreen('screen-stones')"><div class="icon">🪨</div><div class="title">石頭桌子</div><div id="status-stones">未解決</div></div>
+                    <div class="clickable-object" onclick="goToScreen('screen-canvas')"><div class="icon">🖼️</div><div class="title">空白畫布</div><div id="status-canvas">未顯影</div></div>
+                    <div class="clickable-object" onclick="goToScreen('screen-safe')"><div class="icon">🔒</div><div class="title">保險箱</div><div id="status-safe">上鎖中</div></div>
+                </div>
+                <button class="btn" style="width:100%; margin-top:20px; background:#475569; color:white;" onclick="goToScreen('screen-doors')">🚪 前往出口大門</button>
+            </div>
+
+            <div id="screen-potions" class="screen">
+                <h2>🧪 藥水推理</h2>
+                <div id="potion-p1">
+                    <div class="hint-box">提示：A藥水不是最輕；C藥水小於B藥水；B藥水是第二重。找出「最重」的藥水。</div>
+                    <div class="options-group">
+                        <button class="btn btn-secondary" onclick="solvePotion('A')">A 藥水瓶</button>
+                        <button class="btn btn-secondary" onclick="solvePotion('B')">B 藥水瓶</button>
+                        <button class="btn btn-secondary" onclick="solvePotion('C')">C 藥水瓶</button>
+                    </div>
+                </div>
+                <div id="potion-p2" style="display:none;">
+                    <p class="story-text">你找到了最重的藥水，但它似乎蒸發了。觀測顯示：<br>
+                    A: 30ml 剩下 1/6 | B: 24ml 剩下 1/4 | C: 20ml 剩下 1/2</p>
+                    <div class="hint-box">找出現在「剩餘容量最多」的藥水收集起來。</div>
+                    <div class="options-group">
+                        <button class="btn btn-secondary" onclick="collectPotion('A')">收集 A 藥水剩餘量</button>
+                        <button class="btn btn-secondary" onclick="collectPotion('B')">收集 B 藥水剩餘量</button>
+                        <button class="btn btn-secondary" onclick="collectPotion('C')">收集 C 藥水剩餘量</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="goToScreen('screen-main')">返回</button>
+            </div>
+
+            <div id="screen-stones" class="screen">
+                <h2>🪨 石頭體積</h2>
+                <div id="stone-content"></div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="goToScreen('screen-main')">返回</button>
+            </div>
+
+            <div id="screen-canvas" class="screen">
+                <h2>🖼️ 畫布顯影</h2>
+                <div id="canvas-content">
+                    <div class="canvas-area" style="text-align:center;">畫布目前空無一物。</div>
+                    <button id="use-revealer" class="btn" style="display:none;" onclick="revealCanvas()">使用顯影劑</button>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="goToScreen('screen-main')">返回</button>
+            </div>
+
+            <div id="screen-safe" class="screen">
+                <h2>🔒 保險箱</h2>
+                <div class="code-lock-container">
+                    <div class="lock-display" id="lock-display">----</div>
+                    <div class="keyboard">
+                        <button class="key" onclick="pressKey('1')">1</button><button class="key" onclick="pressKey('2')">2</button><button class="key" onclick="pressKey('3')">3</button>
+                        <button class="key" onclick="pressKey('4')">4</button><button class="key" onclick="pressKey('5')">5</button><button class="key" onclick="pressKey('6')">6</button>
+                        <button class="key" onclick="pressKey('7')">7</button><button class="key" onclick="pressKey('8')">8</button><button class="key" onclick="pressKey('9')">9</button>
+                        <button class="key" style="color:#ef4444;" onclick="pressKey('C')">C</button><button class="key" onclick="pressKey('0')">0</button><button class="key" style="color:#22c55e;" onclick="pressKey('OK')">OK</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="goToScreen('screen-main')">返回</button>
+            </div>
+
+            <div id="screen-doors" class="screen">
+                <h2>🚪 出口大門</h2>
+                <p class="story-text">四道大門，只有一道是正確的。提示就在密碼中。</p>
+                <div class="doors-grid">
+                    <div class="door" onclick="unlockDoor('13:30')"><div class="door-time">13:30</div></div>
+                    <div class="door" onclick="unlockDoor('16:20')"><div class="door-time">16:20</div></div>
+                    <div class="door" onclick="unlockDoor('14:20')"><div class="door-time">14:20</div></div>
+                    <div class="door" onclick="unlockDoor('18:30')"><div class="door-time">18:30</div></div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="goToScreen('screen-main')">返回</button>
+            </div>
+
+            <div id="screen-win" class="screen" style="text-align:center;">
+                <h1 style="color:var(--success-color); font-size:3rem; margin-bottom:20px;">成功逃脫！</h1>
+                <p class="story-text">你將鑰匙插入 14:20 的大門，鎖心轉動的聲音如此悅耳。<br>你成功運用了邏輯、計算與觀察力，逃離了這座房間！</p>
+                <button class="btn" onclick="location.reload()">再玩一次</button>
+            </div>
+
+        </div>
+
+        <div id="inventory-bar">
+            <div class="inventory-title">物品欄：</div>
+            <div id="inv-container" style="display:flex; gap:10px;"></div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        let state = {
+            inventory: [],
+            potionSolved: false,
+            stoneSolved: false,
+            canvasRevealed: false,
+            safeOpened: false,
+            currentCode: ""
+        };
+
+        function showToast(msg) {
+            let t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(()=> t.style.display='none', 2500);
+        }
+
+        function goToScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'screen-stones') renderStones();
+            if(id === 'screen-canvas') renderCanvas();
+        }
+
+        function updateInv() {
+            let container = document.getElementById('inv-container');
+            container.innerHTML = state.inventory.map(i => `<div class="inv-item"><span>${i.icon}</span>${i.name}</div>`).join('');
+        }
+
+        function solvePotion(p) {
+            if(p === 'A') {
+                document.getElementById('potion-p1').style.display = 'none';
+                document.getElementById('potion-p2').style.display = 'block';
+                showToast("推理正確！A原本是最重的。");
+            } else {
+                showToast("邏輯推理不正確，再想想。");
+            }
+        }
+
+        function collectPotion(p) {
+            if(p === 'C') {
+                state.inventory.push({id:'potion', name:'高濃度藥水(10ml)', icon:'🧪'});
+                state.potionSolved = true;
+                updateInv();
+                document.getElementById('status-potions').innerText = "已解決";
+                showToast("正確！C藥水現在剩下10ml是最多的。");
+                goToScreen('screen-main');
+            } else {
+                let amt = (p === 'A') ? "5" : "6";
+                showToast(`這瓶剩餘量測量只有 ${amt}ml，不是剩餘最多的。`);
+            }
+        }
+
+        function renderStones() {
+            let container = document.getElementById('stone-content');
+            if(state.stoneSolved) {
+                container.innerHTML = "<p class='story-text'>你已經獲得了顯影劑。</p>";
+                return;
+            }
+            if(!state.inventory.find(i=>i.id==='potion')) {
+                container.innerHTML = "<p class='story-text'>桌上放著 5x5 的容器，你需要先獲得足夠量的藥水來進行下一步。</p>";
+                return;
+            }
+            container.innerHTML = `
+                <p class='story-text'>容器內部底面邊長 5x5 = 25cm²。你需要挑選一顆合適的石頭放入藥水中，使水位精確上升 4cm 以引發化學顯影反應。</p>
+                <div class="options-group">
+                    <button class="btn btn-secondary" onclick="pickStone(90)">石頭 A (90cm³)</button>
+                    <button class="btn btn-secondary" onclick="pickStone(105)">石頭 B (105cm³)</button>
+                    <button class="btn btn-secondary" onclick="pickStone(100)">石頭 C (100cm³)</button>
+                </div>
+            `;
+        }
+
+        function pickStone(v) {
+            if(v === 100) {
+                state.inventory = state.inventory.filter(i=>i.id!=='potion');
+                state.inventory.push({id:'revealer', name:'特殊顯影劑', icon:'✨'});
+                state.stoneSolved = true;
+                updateInv();
+                document.getElementById('status-stones').innerText = "已解決";
+                showToast("計算正確！25 × 4 = 100。化學反應成功，獲得顯影劑。");
+                goToScreen('screen-main');
+            } else {
+                showToast("體積不對，產生的液位差無法觸發反應。");
+            }
+        }
+
+        function renderCanvas() {
+            let container = document.getElementById('canvas-content');
+            if(state.canvasRevealed) {
+                container.innerHTML = `
+                    <div class="canvas-area">
+                        <svg class="svg-container" viewBox="0 0 400 200">
+                            <!-- 水平對稱切線 -->
+                            <line class="cut-line" x1="20" y1="100" x2="380" y2="100" />
+                            
+                            <!-- 1 的顯示部分 (b段) -->
+                            <g transform="translate(40, 20)">
+                                <line class="digit-segment" x1="40" y1="20" x2="40" y2="60" />
+                            </g>
+
+                            <!-- 3 的顯示部分 (a, b, g段) -->
+                            <g transform="translate(130, 20)">
+                                <line class="digit-segment" x1="0" y1="20" x2="40" y2="20" />
+                                <line class="digit-segment" x1="40" y1="20" x2="40" y2="60" />
+                                <line class="digit-segment" x1="0" y1="60" x2="40" y2="60" />
+                            </g>
+
+                            <!-- 8 的顯示部分 (f, a, b, g段) -->
+                            <g transform="translate(220, 20)">
+                                <line class="digit-segment" x1="0" y1="20" x2="0" y2="60" />
+                                <line class="digit-segment" x1="0" y1="20" x2="40" y2="20" />
+                                <line class="digit-segment" x1="40" y1="20" x2="40" y2="60" />
+                                <line class="digit-segment" x1="0" y1="60" x2="40" y2="60" />
+                            </g>
+
+                            <!-- 0 的顯示部分 (f, a, b段) -->
+                            <g transform="translate(310, 20)">
+                                <line class="digit-segment" x1="0" y1="20" x2="0" y2="60" />
+                                <line class="digit-segment" x1="0" y1="20" x2="40" y2="20" />
+                                <line class="digit-segment" x1="40" y1="20" x2="40" y2="60" />
+                            </g>
+                        </svg>
+                        <p style="margin-top:15px; font-size:0.95rem; color:var(--accent-color); line-height:1.5;">
+                            <b>【顯影線索】</b><br>
+                            畫布上出現了四個並排的殘缺電子數碼結構。中間的紅色虛線為水平對稱軸。<br>
+                            請在腦海中將這些<b>虛線以上的殘缺線段向下進行水平鏡像還原</b>，即可拼湊出密碼。
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            if(state.inventory.find(i=>i.id==='revealer')) {
+                container.innerHTML = `
+                    <div class="canvas-area" style="text-align:center;">畫布表面隱約有反應痕跡。</div>
+                    <button class="btn" style="width:100%;" onclick="revealCanvas()">🧪 使用特殊顯影劑塗抹畫布</button>
+                `;
+            } else {
+                container.innerHTML = "<div class='canvas-area' style='text-align:center;'>畫布目前一片雪白。直接觀察看不出任何筆觸，可能需要某種試劑。</div>";
+            }
+        }
+
+        function revealCanvas() {
+            state.canvasRevealed = true;
+            state.inventory = state.inventory.filter(i=>i.id!=='revealer');
+            updateInv();
+            document.getElementById('status-canvas').innerText = "已顯影";
+            showToast("特殊顯影劑產生作用了！");
+            renderCanvas();
+        }
+
+        function pressKey(k) {
+            let d = document.getElementById('lock-display');
+            if(k === 'C') {
+                state.currentCode = "";
+            } else if(k === 'OK') {
+                if(state.currentCode === "1380") {
+                    state.safeOpened = true;
+                    state.inventory.push({id:'key', name:'鋼鐵大門鑰匙', icon:'🔑'});
+                    updateInv();
+                    document.getElementById('status-safe').innerText = "已開啟";
+                    showToast("密碼正確！保險箱機關重啟，獲得大門鑰匙。");
+                    goToScreen('screen-main');
+                } else {
+                    showToast("密碼錯誤。提示：注意畫布上由左至右還原出的4位數字。");
+                    state.currentCode = "";
+                }
+            } else {
+                if(state.currentCode.length < 4) state.currentCode += k;
+            }
+            d.innerText = state.currentCode.padEnd(4, '-');
+        }
+
+        function unlockDoor(t) {
+            if(!state.inventory.find(i=>i.id==='key')) {
+                showToast("大門緊鎖。你需要先獲得保險箱裡的『鑰匙』。");
+                return;
+            }
+            if(t === '14:20') {
+                goToScreen('screen-win');
+            } else {
+                showToast("鑰匙雖然能插入，但鎖心無法轉動。看來時間對應錯誤！");
+            }
+        }
+    </script>
+</body>
+</html>

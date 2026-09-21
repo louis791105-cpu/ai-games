@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沖繩＋福岡親子 8 日｜2026.7.23–7.30</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ── MindMarket tokens ── */
+  :root{
+    --cream:#f5f1e4;      /* Cream Paper — page canvas */
+    --white:#ffffff;      /* elevated cards / floating nav */
+    --sand:#e0dbce;       /* Sandstone — recessed surface */
+    --ink:#2c2e2a;        /* Ink Black — primary text */
+    --gray:#80827f;       /* Stone Gray — muted text */
+    --mist:#d5d5d4;       /* Hairline Mist — subtle borders */
+    --grass:#8ed462;      /* Fresh Grass — structural accent */
+    --sky:#2ba0ff;        /* Sky Pop — decorative dot */
+    --coral:#ff705d;      /* Coral Pop — tag outlines */
+    --sun:#f5e211;        /* Sunshine Pop — footer band */
+    --font:'Inter','Noto Sans TC',ui-sans-serif,system-ui,-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);background:var(--cream);color:var(--ink);
+    font-size:15px;line-height:1.5;font-weight:400;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px}
+
+  /* ── Floating pill nav ── */
+  nav.pill{
+    position:sticky;top:10px;z-index:30;margin:12px auto 0;max-width:640px;padding:0 12px;
+  }
+  nav.pill .bar{
+    background:var(--white);border-radius:50px;border:1.5px solid var(--grass);
+    display:flex;gap:4px;overflow-x:auto;padding:8px 10px;scrollbar-width:none;
+  }
+  nav.pill .bar::-webkit-scrollbar{display:none}
+  .navlink{
+    flex:0 0 auto;text-decoration:none;color:var(--ink);
+    font-size:13px;font-weight:500;padding:7px 13px;border-radius:50px;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .navlink:active,.navlink:focus-visible{border-color:var(--ink);outline:none}
+  .navlink b{font-weight:600;margin-right:3px}
+  .navlink span{color:var(--gray);font-size:11px}
+
+  /* ── Hero ── */
+  header.hero{padding:52px 0 34px;text-align:left}
+  .eyebrow{font-size:12px;font-weight:500;letter-spacing:.18em;color:var(--gray);text-transform:uppercase}
+  h1{
+    font-weight:500;font-size:clamp(42px,12vw,56px);
+    line-height:1.02;letter-spacing:-.04em;margin:12px 0 14px;
+  }
+  h1 .dot{display:inline-block;width:.32em;height:.32em;border-radius:50%;background:var(--grass);vertical-align:.06em;margin:0 .12em}
+  .hero-sub{font-size:16px;color:var(--ink)}
+  .hero-meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-size:12.5px;font-weight:500;border-radius:50px;padding:5px 13px;background:var(--white);
+  }
+  .chip.oki{border:1.5px solid var(--grass)}
+  .chip.fuk{border:1.5px solid var(--coral)}
+  .chip.plain{border:1px solid var(--mist)}
+  .swipe-hint{
+    margin-top:22px;background:var(--white);border-radius:50px;padding:10px 18px;
+    font-size:13px;color:var(--ink);display:inline-flex;align-items:center;gap:8px;
+  }
+  .swipe-hint i{width:9px;height:9px;border-radius:50%;background:var(--sky);flex:0 0 auto}
+
+  /* ── Day section ── */
+  section.day{padding:34px 0 6px}
+  .day-head{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+  .day-num{font-weight:500;font-size:44px;letter-spacing:-.04em;line-height:1}
+  .day-info .dow{font-size:13px;color:var(--gray)}
+  .day-title{font-weight:700;font-size:19px;margin-top:2px}
+  .day-tag{
+    margin-left:auto;align-self:center;font-size:12px;font-weight:500;
+    border-radius:50px;padding:4px 12px;background:var(--white);white-space:nowrap;
+  }
+  .day-tag.oki{border:1.5px solid var(--grass)}
+  .day-tag.fuk{border:1.5px solid var(--coral)}
+
+  /* ── Slot + carousel ── */
+  .slot{margin:18px 0}
+  .slot-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .slot-time{
+    font-weight:600;font-size:14px;background:var(--white);border:1.5px solid var(--grass);
+    border-radius:50px;padding:3px 12px;
+  }
+  .slot-label{font-size:12.5px;color:var(--gray)}
+  .slot-dots{margin-left:auto;display:flex;gap:5px}
+  .slot-dots i{width:7px;height:7px;border-radius:50%;background:var(--mist);transition:background .2s}
+  .slot-dots i.on{background:var(--ink)}
+
+  .car{
+    display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+    scrollbar-width:none;margin:0 -16px;padding:0 16px;
+  }
+  .car::-webkit-scrollbar{display:none}
+  .opt{
+    flex:0 0 100%;scroll-snap-align:center;
+    background:var(--white);border-radius:34px;padding:18px 20px 16px;
+    min-height:112px;
+  }
+  .car.multi .opt{flex-basis:88%}
+  .opt .role{
+    display:inline-block;font-size:11px;font-weight:600;border-radius:50px;
+    padding:2px 10px;margin-bottom:8px;
+  }
+  .opt.main .role{border:1.5px solid var(--grass);color:var(--ink)}
+  .opt.alt  .role{border:1.5px solid var(--coral);color:var(--ink)}
+  .opt.fixed .role{border:1px solid var(--mist);color:var(--gray)}
+  .opt h4{font-size:16.5px;font-weight:700;line-height:1.35}
+  .opt p{font-size:13.5px;color:var(--gray);margin-top:5px}
+  .opt .tags{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+  .mini{
+    font-size:11px;font-weight:500;border-radius:10px;padding:2px 8px;
+    border:1px solid var(--mist);color:var(--ink);background:var(--white);
+  }
+  .mini.coral{border-color:var(--coral)}
+  .mini.sky{border-color:var(--sky)}
+  .mini.grass{border-color:var(--grass)}
+
+  /* day memo — recessed sandstone */
+  .memo{
+    background:var(--sand);border-radius:34px;padding:14px 20px;margin:16px 0 4px;
+    font-size:13.5px;
+  }
+  .memo b{font-weight:700}
+
+  /* ── Info cards ── */
+  h2.sec{font-weight:500;font-size:30px;letter-spacing:-.02em;line-height:1.2;margin:52px 0 16px}
+  .info{
+    background:var(--white);border-radius:34px;padding:20px 21px;margin-bottom:14px;
+  }
+  .info h3{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .info h3 i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .i-grass{background:var(--grass)} .i-sky{background:var(--sky)} .i-coral{background:var(--coral)}
+  .info table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .info td{padding:6px 0;vertical-align:top;border-bottom:1px solid var(--cream)}
+  .info tr:last-child td{border-bottom:none}
+  .info td:first-child{color:var(--gray);width:37%;padding-right:8px}
+  .info td b{font-weight:600}
+  ul.check{list-style:none}
+  .check li{padding:7px 0 7px 28px;position:relative;font-size:14px;border-bottom:1px solid var(--cream)}
+  .check li:last-child{border-bottom:none}
+  .check li::before{
+    content:"";position:absolute;left:2px;top:11px;width:13px;height:13px;
+    border:1.5px solid var(--grass);border-radius:5px;
+  }
+
+  /* ── Footer band ── */
+  footer{
+    margin-top:56px;background:var(--sun);padding:44px 16px 52px;text-align:center;
+  }
+  footer .big{font-weight:500;font-size:clamp(30px,9vw,44px);letter-spacing:-.03em;line-height:1.05}
+  footer .small{font-size:13px;margin-top:10px;font-weight:500}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav class="pill"><div class="bar">
+  <a class="navlink" href="#d23"><b>7/23</b><span>那霸</span></a>
+  <a class="navlink" href="#d24"><b>7/24</b><span>海灘</span></a>
+  <a class="navlink" href="#d25"><b>7/25</b><span>名護</span></a>
+  <a class="navlink" href="#d26"><b>7/26</b><span>飛福岡</span></a>
+  <a class="navlink" href="#d27"><b>7/27</b><span>北九州</span></a>
+  <a class="navlink" href="#d28"><b>7/28</b><span>太宰府</span></a>
+  <a class="navlink" href="#d29"><b>7/29</b><span>玩水</span></a>
+  <a class="navlink" href="#d30"><b>7/30</b><span>回程</span></a>
+</div></nav>
+
+<header class="hero wrap">
+  <div class="eyebrow">Family Trip · 2026.07.23 – 07.30</div>
+  <h1>沖繩<span class="dot"></span>福岡<br>親子八日</h1>
+  <p class="hero-sub">2 大 1 小｜沖繩自駕三日，福岡電車五日</p>
+  <div class="hero-meta">
+    <span class="chip oki">沖繩 7/23–26</span>
+    <span class="chip fuk">福岡 7/26–30</span>
+    <span class="chip plain">TPE → OKA → FUK → TPE</span>
+  </div>
+  <div class="swipe-hint"><i></i>每個時段可左右滑動，切換主行程與備案</div>
+</header>
+
+<main class="wrap">
+
+<!-- ═══════ 7/23 ═══════ -->
+<section class="day" id="d23">
+  <div class="day-head">
+    <div class="day-num">7/23</div>
+    <div class="day-info"><div class="dow">星期四</div><div class="day-title">出發・抵達那霸</div></div>
+    <span class="day-tag oki">沖繩</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">16:00</span><span class="slot-label">桃園機場</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>桃園機場第一航廈報到</h4>
+      <p>樂桃 MM930：起飛前 120–50 分完成報到。手提每人 2 件合計 7kg、含 1 件託運。</p>
+      <div class="tags"><span class="mini">座位 3A·3B·3C</span></div>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:05</span><span class="slot-label">飛行</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>MM930 桃園 → 那霸</h4>
+      <p>20:50 抵達那霸機場，入境後搭單軌電車到「旭橋站」約 12 分。</p>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">21:30</span><span class="slot-label">晚間安排</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>Hotel Resol Trinity Naha 入住休息</h4>
+        <p>旭町 7，旭橋站步行即到。抵達已晚，直接休息養精蓄銳。</p>
+        <div class="tags"><span class="mini">含早餐</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>便利商店補給散步</h4>
+        <p>飯店周邊便利商店買水、牛奶和隔天點心，順便讓小孩放一下電再睡。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>國際通快閃夜逛</h4>
+        <p>小孩精神還很好的話：搭單軌一站到縣廳前，國際通口散步 30 分鐘感受沖繩夜晚。</p>
+        <div class="tags"><span class="mini coral">別逛太晚</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7/24 ═══════ -->
+<section class="day" id="d24">
+  <div class="day-head">
+    <div class="day-num">7/24</div>
+    <div class="day-info"><div class="dow">星期五</div><div class="day-title">陶器街 → 安良波海灘</div></div>
+    <span class="day-tag oki">沖繩</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:00</span><span class="slot-label">取車</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>美榮橋站前 ORIX 取車</h4>
+      <p>外語櫃檯，含 4 歲兒童座椅，現場刷卡付 ¥24,920。</p>
+      <div class="tags"></div>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:20</span><span class="slot-label">上午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>壺屋やちむん通り・yacchi&moon</h4>
+        <p>車程 5 分。陶器老街散步，yacchi&moon 的小熊陶器超好買（10:00 開）。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>國際通＋第一牧志公設市場</h4>
+        <p>想逛熱鬧一點：市場看魚、買沖繩零食，讓小孩看看在地市場的樣子。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>波上宮＋波之上海灘</h4>
+        <p>建在崖上的神社，下面就是離市區最近的小海灘，拍照快閃行程。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">12:30</span><span class="slot-label">午餐・北谷</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>HAPPY BOWLS ARAHA</h4>
+        <p>巴西莓果碗＋吐司，就在安良波海灘正對面（8:00–17:00）。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>美國村塔可飯</h4>
+        <p>沖繩靈魂料理 Taco Rice，美國村選擇多、份量大，小孩接受度高。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>浜屋そば 沖繩麵</h4>
+        <p>北谷在地老店，清爽豬骨湯頭的沖繩麵，離海灘車程 5 分。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">15:30</span><span class="slot-label">玩水時段</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>安良波海灘泡水</h4>
+        <p>13:30 先玩海盜船遊具（有樹蔭），15:30 太陽轉弱下水，玩到 17:00。有救生員與淋浴間。</p>
+        <div class="tags"><span class="mini sky">帶水陸鞋</span><span class="mini">防碎珊瑚</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>北谷公園日落海灘</h4>
+        <p>美國村旁的人工海灘，沙質細、坡度緩，離晚餐地點走路就到。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>提早 check-in 玩飯店泳池</h4>
+        <p>天氣不穩就直奔宜野灣，月球海洋的泳池一樣能讓小孩玩到累。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:00</span><span class="slot-label">晚餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>美國村晚餐＋夕陽摩天輪</h4>
+        <p>自由覓食＋看夕陽，20:00 前到宜野灣入住（check-in 至 23:30）。</p>
+        <div class="tags"><span class="mini">停車免費</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>Depot Island 海景餐廳</h4>
+        <p>美國村靠海側整排海景餐廳，邊吃邊看海直接接日落。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>宜野灣飯店周邊食堂</h4>
+        <p>小孩累了就先入住，飯店附近食堂或超市簡單解決。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7/25 ═══════ -->
+<section class="day" id="d25">
+  <div class="day-head">
+    <div class="day-num">7/25</div>
+    <div class="day-info"><div class="dow">星期六</div><div class="day-title">名護親子日</div></div>
+    <span class="day-tag oki">沖繩</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:00</span><span class="slot-label">上午・名護</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>名護鳳梨公園</h4>
+        <p>9:15 出發走高速約 50 分，開園就進場。無人駕駛鳳梨車、恐龍區、蝴蝶園約 1.5 小時，室內多好避暑。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>OKINAWA 水果樂園</h4>
+        <p>就在鳳梨公園隔壁，闖關解謎型果園，全室內、雨天也不怕。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>部瀨名海中公園玻璃船</h4>
+        <p>不下水也能看珊瑚和熱帶魚，海中展望塔＋玻璃底船，4 歲很買單。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">12:00</span><span class="slot-label">午餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>Restaurant Flipper 潛水員牛排</h4>
+        <p>名護老字號，嫩菲力是招牌。只營業 10:30–14:00，開店早到避排隊。</p>
+        <div class="tags"><span class="mini coral">只收現金</span><span class="mini">週三公休</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>百年古家 大家（うふやー）</h4>
+        <p>百年古民家裡吃阿古豬料理，環境本身就是景點，人多建議避開正午。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>宮里そば</h4>
+        <p>名護市區沖繩麵人氣店，快速、便宜、小孩好入口。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">13:30</span><span class="slot-label">下午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>Neo Park 名護自然動物公園</h4>
+        <p>近距離餵鳥、摸水豚和山羊，小火車繞園（9:30–17:30）。近年帶小孩的口碑首選。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>古宇利島＋橋下沙灘</h4>
+        <p>車程約 25 分，跨海大橋景色沖繩前段班，橋下沙灘可以踩踩水。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>提早回程逛 AEON</h4>
+        <p>體力見底就南下，回程順路超市採買＋吹冷氣，傍晚泳池見。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">16:30</span><span class="slot-label">傍晚</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>飯店泳池放電</h4>
+        <p>回宜野灣泡泳池，晚餐周邊解決，早點睡——明天要早起還車。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>宜野灣熱帶海灘看夕陽</h4>
+        <p>飯店附近的市民海灘，傍晚淺灘踩水配夕陽，免費又近。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="memo"><b>今晚待辦：</b>行李收好、車加滿油，明早 7:15 出發還車才從容。</div>
+</section>
+
+<!-- ═══════ 7/26 ═══════ -->
+<section class="day" id="d26">
+  <div class="day-head">
+    <div class="day-num">7/26</div>
+    <div class="day-info"><div class="dow">星期日</div><div class="day-title">移動日 → 博多</div></div>
+    <span class="day-tag fuk">→ 福岡</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">08:00</span><span class="slot-label">還車・飛行</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>美榮橋還車 → SKY502 飛福岡</h4>
+      <p>7:15 離開飯店（車程 30–40 分）→ 8:00 還車 → 單軌到機場 15 分 → 9:00 前天馬櫃檯報到（預訂 0749）→ 10:10 起飛、11:55 抵福岡。</p>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">12:15</span><span class="slot-label">午餐・博多站</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>黑毛和牛 博多牛まぶし 武藏</h4>
+        <p>平價黑毛和牛飯，離公寓走路 3 分。熱門店，11:45 前到最保險。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span><span class="mini coral">週二公休</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>博多站くうてん美食街</h4>
+        <p>武藏排太長就上 JR 博多城 9–10F，拉麵、洋食、鰻魚應有盡有。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>站內駅弁＋公寓野餐</h4>
+        <p>買便當回公寓邊等 check-in 邊吃，小孩可以先休息。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">14:00</span><span class="slot-label">下午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>福岡麵包超人兒童博物館</h4>
+        <p>博多河岸城 5–6F，行李先寄公寓或置物櫃，玩到閉館 17:00。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>博多站屋頂 燕林廣場</h4>
+        <p>JR 博多城頂樓免費庭園，有迷你小火車和展望台，省錢版放電。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>公寓午睡＋傍晚再出門</h4>
+        <p>移動日累了就先休息，傍晚涼快再出來逛川端。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">17:15</span><span class="slot-label">點心</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>Bonet 喫茶ボネ</h4>
+        <p>神級布丁＋復古喫茶店，離麵包超人走路 1 分，售完為止。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>川端善哉廣場</h4>
+        <p>商店街裡的博多名物紅豆年糕湯，老派但小孩意外愛。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:30</span><span class="slot-label">晚餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>川端商店街 / 運河城</h4>
+        <p>運河城整點有水舞秀，看完順便吃晚餐再回公寓。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>華味鳥水炊鍋</h4>
+        <p>博多名物雞肉鍋，湯頭溫和適合全家，站前有分店。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>中洲屋台體驗</h4>
+        <p>河邊路邊攤氛圍滿點；帶小孩選傍晚剛開攤時段人較少。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7/27 ═══════ -->
+<section class="day" id="d27">
+  <div class="day-head">
+    <div class="day-num">7/27</div>
+    <div class="day-info"><div class="dow">星期一</div><div class="day-title">北九州・恐龍博物館</div></div>
+    <span class="day-tag fuk">福岡</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">08:30</span><span class="slot-label">出發</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>JR 鹿兒島本線快速 → スペースワールド站</h4>
+      <p>博多搭往小倉方向約 1 小時（部分班次需小倉／戶畑轉普通車，出發前用轉乘 App 確認），出站走 5 分。</p>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">09:40</span><span class="slot-label">上午重頭戲</span></div>
+    <div class="car"><article class="opt main"><span class="role">主行程</span>
+      <h4>いのちのたび博物館（自然史・歷史博物館）</h4>
+      <p>一樓恐龍大廳全身骨架 → エンバイラマ館「會動的白堊紀恐龍」→ 兒童互動探索區、昆蟲標本。扎實 2.5–3 小時（9:00–17:00）。</p>
+      <div class="tags"><span class="mini sky">指定行程</span><span class="mini">前晚查 kmnh.jp 確認開館</span></div>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">12:30</span><span class="slot-label">午餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>THE OUTLETS KITAKYUSHU 美食街</h4>
+        <p>博物館旁走 5 分，選擇多、有冷氣，飯後可順逛 outlet。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>隔壁 AEON Mall 美食街</h4>
+        <p>與 outlet 天橋相連，家庭餐廳選項更多、更平價。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">14:00</span><span class="slot-label">下午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>スペース LABO 科學館</h4>
+        <p>同區走路可到，九州最大天象儀＋動手玩科學，室內涼爽，15:30 搭 JR 回博多。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>門司港懷舊區</h4>
+        <p>體力充足版：JR 經小倉到門司港約 40 分，懷舊街區＋藍翼吊橋＋燒咖哩。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>直接回博多休息</h4>
+        <p>博物館玩到滿足就提早回程，公寓午睡，保留晚餐體力。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:00</span><span class="slot-label">晚餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>博多燒肉 八十八</h4>
+        <p>博多駅東 3-3-12，離公寓走路 5 分（17:00 開）。</p>
+        <div class="tags"><span class="mini coral">要訂位</span><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>海鳴 魚介豚骨拉麵</h4>
+        <p>沒訂到位的備援：博多站周邊人氣拉麵，濃郁系代表。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>站內くうてん自由選</h4>
+        <p>累了就近解決，鐵板燒、蛋包飯、迴轉壽司都有。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7/28 ═══════ -->
+<section class="day" id="d28">
+  <div class="day-head">
+    <div class="day-num">7/28</div>
+    <div class="day-info"><div class="dow">星期二</div><div class="day-title">太宰府 → 天神購物</div></div>
+    <span class="day-tag fuk">福岡</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">08:00</span><span class="slot-label">早餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>Pork Tamago 赤坂店</h4>
+        <p>地鐵赤坂站，現做明太子飯糰（7:00 開），吃完直接走到天神搭西鐵。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>天神地下街咖啡早餐</h4>
+        <p>不想繞赤坂就直接到天神，地下街晨間套餐選擇多。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">09:40</span><span class="slot-label">上午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>太宰府天滿宮＋參道＋遊園地</h4>
+        <p>西鐵約 30–40 分。參道吃梅枝餅、天山買季節水果大福（夏季是麝香葡萄款＋草莓冰棒）、參拜臨時拜殿，最後だざいふ遊園地放大絕——昭和復古小樂園，4 歲能玩大多數設施。</p>
+        <div class="tags"><span class="mini grass">口袋名單：天山</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>福岡市動植物園</h4>
+        <p>不想跑太宰府的市區替代案：地鐵藥院大通站，動物園＋植物園一票玩到底。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>直接天神室內日</h4>
+        <p>太熱就全日天神：百貨兒童樓層＋玩具店＋地下街，全程冷氣。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">13:00</span><span class="slot-label">午餐・天神</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>麺や兼虎 渡辺通本店</h4>
+        <p>濃郁沾麵，天神南走路幾分鐘（10:00–22:00），離峰時段排隊短。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>Solaria Plaza 美食街</h4>
+        <p>兼虎人太多就進百貨，親子座位好找、選擇多。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">14:30</span><span class="slot-label">下午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>天神購物</h4>
+        <p>天神地下街、PARCO、大丸三越輪流吹冷氣；小孩累了警固公園放風。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>teamLab Forest（BOSS E·ZO）</h4>
+        <p>PayPay 巨蛋旁的沉浸式數位藝術，全室內，親子評價極高。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>福岡塔＋百道海濱</h4>
+        <p>傍晚塔上看景、塔下沙灘玩沙，接夕陽剛剛好。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:00</span><span class="slot-label">晚餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>博多爐端 魚男</h4>
+        <p>今泉 1-4-23，現場烤物＋玉子燒表演，晚餐採預約制。</p>
+        <div class="tags"><span class="mini coral">要訂位</span><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>今泉・大名居酒屋巡禮</h4>
+        <p>魚男訂不到就在同一區找家庭友善居酒屋，氣氛一樣好。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>回博多站周邊</h4>
+        <p>小孩沒電了就搭地鐵回站區吃，飯後直接回公寓。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="memo"><b>提醒：</b>武藏牛まぶし今天（週二）公休；海之中道也是週二休園，所以玩水排明天。</div>
+</section>
+
+<!-- ═══════ 7/29 ═══════ -->
+<section class="day" id="d29">
+  <div class="day-head">
+    <div class="day-num">7/29</div>
+    <div class="day-info"><div class="dow">星期三</div><div class="day-title">海之中道玩水日</div></div>
+    <span class="day-tag fuk">福岡</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">09:00</span><span class="slot-label">早餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>PAN DEL SOL</h4>
+        <p>上川端町烘焙坊（9:00 開），麵包咖啡外帶上車，水果塔評價超高。</p>
+        <div class="tags"><span class="mini grass">口袋名單</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>博多站買了就走</h4>
+        <p>趕早班車就在站內麵包店解決，車上吃。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:20</span><span class="slot-label">全日主行程</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>海之中道 Sunshine Pool</h4>
+        <p>JR 博多→香椎轉香椎線約 40 分。7 月水上樂園開放，有幼兒淺水池；園內餐車午餐，15:00 前撤退。</p>
+        <div class="tags"><span class="mini sky">玩水</span><span class="mini coral">週二休園</span></div>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>海之中道腳踏車＋動物森林</h4>
+        <p>不玩水版本：租親子腳踏車逛水豚、袋鼠和大型遊具區，樹蔭路線多。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>雨天備案：福岡市科學館</h4>
+        <p>六本松站直結，5 層樓互動展＋天象儀，下雨也能玩一整天。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">18:00</span><span class="slot-label">晚餐</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>一蘭 總本店</h4>
+        <p>中洲川端的創始店朝聖，一人一格小孩覺得新奇，回程順路。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>博多站くうてん</h4>
+        <p>玩水累了就近吃，順手開始打包行李。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>公寓周邊＋超市採買</h4>
+        <p>最省力版本：超市熟食＋水果回公寓吃，早點休息。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7/30 ═══════ -->
+<section class="day" id="d30">
+  <div class="day-head">
+    <div class="day-num">7/30</div>
+    <div class="day-info"><div class="dow">星期四</div><div class="day-title">回程日</div></div>
+    <span class="day-tag fuk">福岡 → 台北</span>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:00</span><span class="slot-label">退房</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>退房・行李寄博多站置物櫃</h4>
+      <p>公寓 10:00 前退房，大件行李寄站內置物櫃輕鬆逛最後半天。</p>
+    </article></div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">10:30</span><span class="slot-label">最後上午</span></div>
+    <div class="car multi">
+      <article class="opt main"><span class="role">主行程</span>
+        <h4>櫛田神社＋川端商店街</h4>
+        <p>輕鬆散步、補買伴手禮，沒吃到的口袋店最後補進度。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>運河城最後採買</h4>
+        <p>玩具店＋水舞秀 encore，小孩的最後願望在這裡實現。</p>
+      </article>
+      <article class="opt alt"><span class="role">備案</span>
+        <h4>博多站慢慢逛</h4>
+        <p>不想再移動就整個上午泡在站內：AMU PLAZA、丸井、地下街。</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-top"><span class="slot-time">16:00</span><span class="slot-label">回程</span></div>
+    <div class="car"><article class="opt fixed"><span class="role">固定行程</span>
+      <h4>地鐵回福岡機場 → CI129 回台北</h4>
+      <p>博多到機場只要 5 分，16:30 前國際線報到（華航每人 2 件 23kg）。19:10 起飛、20:35 抵桃園第二航廈。</p>
+      <div class="tags"></div>
+    </article></div>
+  </div>
+</section>
+
+<!-- ═══════ 資訊 ═══════ -->
+<h2 class="sec">交通與訂位</h2>
+<div class="info">
+  <h3><i class="i-sky"></i>航班</h3>
+  <table>
+    <tr><td>7/23 去程</td><td>樂桃 MM930｜桃園 18:05 → 那霸 20:50</td></tr>
+    <tr><td>7/26 轉場</td><td>天馬 SKY502｜那霸 10:10 → 福岡 11:55｜<b>0749</b></td></tr>
+    <tr><td>7/30 回程</td><td>華航 CI129｜福岡 19:10 → 桃園 20:35</td></tr>
+  </table>
+</div>
+<div class="info">
+  <h3><i class="i-grass"></i>住宿</h3>
+  <table>
+    <tr><td>7/23–24 那霸</td><td>Hotel Resol Trinity Naha（旭町 7）｜含早餐｜<b>5048.956.281</b>／PIN <b>3394</b></td></tr>
+    <tr><td>7/24–26 宜野灣</td><td>月球海洋宜野灣公寓酒店（宇地泊 3-7-12）｜含早餐｜<b>5564.476.889</b>／PIN <b>5936</b></td></tr>
+    <tr><td>7/26–30 博多</td><td>RIVEIL Hakataekimae（博多駅前 4-3-1-11）｜無含餐｜<b>6392.931.268</b>／PIN <b>2653</b></td></tr>
+  </table>
+</div>
+<div class="info">
+  <h3><i class="i-coral"></i>租車（沖繩）</h3>
+  <table>
+    <tr><td>取車</td><td>7/24（五）10:00｜美榮橋站前 ORIX 外語櫃檯</td></tr>
+    <tr><td>還車</td><td>7/26（日）8:00｜同地點，記得先加滿油</td></tr>
+    <tr><td>預約號碼</td><td>含 RAP 安心方案＋兒童座椅｜現場付 ¥24,920</td></tr>
+  </table>
+</div>
+
+<h2 class="sec">出發前待辦</h2>
+<div class="info"><ul class="check">
+  <li>訂位：博多燒肉八十八（7/27 晚 18:00）</li>
+  <li>訂位：博多爐端 魚男（7/28 晚 18:00，晚餐預約制）</li>
+  <li>7/26 晚上 kmnh.jp 確認いのちのたび博物館 7/27 開館</li>
+  <li>準備日圓現金（Flipper 牛排只收現金）</li>
+  <li>泳衣、水陸鞋、防曬、帽子、水壺 × 2 天玩水行程</li>
+  <li>樂桃 APP 先辦理線上報到省排隊</li>
+</ul></div>
+
+<h2 class="sec">夏日提醒</h2>
+<div class="info">
+  <p style="font-size:14px">7 月沖繩、福岡日間普遍 33–35°C：戶外都排早上與傍晚，正午躲進博物館、百貨等冷氣點；隨時補水、勤擦防曬。玩水以 1.5–2 小時為限，下午保留午睡彈性——備案卡片就是為了這個時候滑出來用的。</p>
+</div>
+
+</main>
+
+<footer>
+  <div class="big">Have a nice trip!</div>
+  <div class="small">OKINAWA × FUKUOKA · 2026 SUMMER</div>
+</footer>
+
+<script>
+/* 每個時段的滑動指示點 */
+document.querySelectorAll('.slot').forEach(slot=>{
+  const car=slot.querySelector('.car');
+  const opts=car.querySelectorAll('.opt');
+  if(opts.length<2)return;
+  const dots=document.createElement('div');
+  dots.className='slot-dots';
+  opts.forEach((_,i)=>{
+    const d=document.createElement('i');
+    if(i===0)d.classList.add('on');
+    dots.appendChild(d);
+  });
+  slot.querySelector('.slot-top').appendChild(dots);
+  let t;
+  car.addEventListener('scroll',()=>{
+    clearTimeout(t);
+    t=setTimeout(()=>{
+      const w=opts[0].getBoundingClientRect().width+10;
+      const idx=Math.min(opts.length-1,Math.max(0,Math.round(car.scrollLeft/w)));
+      dots.querySelectorAll('i').forEach((d,i)=>d.classList.toggle('on',i===idx));
+    },60);
+  },{passive:true});
+});
+</script>
+</body>
+</html>
