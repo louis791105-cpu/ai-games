@@ -88,6 +88,8 @@ main{padding:14px 16px 40px;max-width:1240px;margin:0 auto}
 .scard ol{margin:6px 0 0;padding-left:1.3em;line-height:1.6;font-size:14.5px}
 
 .home{max-width:520px;margin:40px auto;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px}
+.roomrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.roomrow a.code{text-decoration:none;color:var(--ink)}
 .home h1{margin:0 0 6px;font-size:24px}
 .field{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin:8px 0 14px}
 .gpick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 16px}
@@ -199,6 +201,7 @@ function memStore(){
     watch(c,cb){ (ls[c]=ls[c]||[]).push(cb); emit(c); return ()=>{ ls[c]=ls[c].filter(f=>f!==cb); }; },
     async set(c,p,v){ if(!db[c]) db[c]={}; setPath(db[c],p.split('/'),v); emit(c); },
     async remove(c,p){ setPath(db[c],p.split('/'),null); emit(c); },
+    async removeRoom(c){ delete db[c]; emit(c); },
     newId: uid,
   };
 }
@@ -211,6 +214,7 @@ function fbStore(){
     watch(c,cb){ const h=s=>cb(s.val()); R(c).on('value',h); return ()=>R(c).off('value',h); },
     set:(c,p,v)=>R(c).child(p).set(v),
     remove:(c,p)=>R(c).child(p).remove(),
+    removeRoom:c=>R(c).remove(),
     newId:()=>d.ref().push().key,
   };
 }
@@ -284,12 +288,14 @@ function renderTeacher(app){
   const ph=phase(); const stories=Object.keys(S.room.stories||{}).length;
   app.innerHTML=`
   <div class="topbar">
+    ${DEMO?'':'<button class="btn" data-act="home">← 首頁</button>'}
     <span class="brand">故事九宮格</span><span class="code">${esc(S.code)}</span>
     <button class="btn" data-act="qr">顯示 QR code</button>
     <div class="tabs">${[1,2,3].map(p=>`<button class="tab ${ph===p?'on':''}" data-act="phase" data-p="${p}">${PHASES[p]}</button>`).join('')}</div>
     <span class="sp"></span>
     <label class="btn">上傳圖卡<input type="file" accept="image/*" id="imgUp" hidden></label>
     <button class="btn" data-act="print">列印／存 PDF</button>
+    ${DEMO?'':`<button class="btn" data-act="delroom" data-code="${esc(S.code)}" style="color:var(--danger)">刪除活動</button>`}
   </div>
   <main>
     <div class="tabs" style="margin-bottom:12px">
@@ -364,7 +370,7 @@ function renderHome(app){
   const recent=lsGet('sk-rooms')||[];
   app.innerHTML=`<div class="home"><h1>故事九宮格</h1><p class="muted">建立一個活動，學生掃 QR code 就能加入。</p>
     <button class="btn primary" data-act="create" style="font-size:17px;padding:12px 18px">建立新活動</button>
-    ${recent.length?`<h3 style="margin-top:24px">最近的活動</h3>${recent.slice(0,8).map(r=>`<p><a href="?teach=${esc(r.code)}&k=${esc(r.key)}">${esc(r.code)}</a> <span class="muted">${new Date(r.t).toLocaleString('zh-TW')}</span></p>`).join('')}`:''}
+    ${recent.length?`<h3 style="margin-top:24px">最近的活動</h3>${recent.map(r=>`<div class="roomrow"><a href="?teach=${esc(r.code)}&k=${esc(r.key)}" class="code">${esc(r.code)}</a><span class="muted">${new Date(r.t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span><span class="sp"></span><a class="btn" href="?teach=${esc(r.code)}&k=${esc(r.key)}">開啟</a><button class="btn" data-act="delroom" data-code="${esc(r.code)}" style="color:var(--danger)">刪除</button></div>`).join('')}`:'<p class="muted" style="margin-top:20px">還沒有活動。</p>'}
   </div>`;
 }
 function renderJoin(app){
@@ -428,6 +434,17 @@ document.addEventListener('click', async e=>{
     case 'compact': S.compact=!S.compact; return render();
     case 'phase': return store.set(S.code,'meta/phase',Number(b.dataset.p));
     case 'print': return window.print();
+    case 'home': location.href=location.href.split('?')[0].split('#')[0]; return;
+    case 'delroom': {
+      const code=b.dataset.code;
+      return openModal(`<h3>刪除活動 ${esc(code)}？</h3><p>這個活動的圖卡、所有便利貼和學生的故事都會<b>永久刪除</b>，無法復原。</p><p class="muted">如果想保留，請先用「列印／存 PDF」存下來。</p>
+        <div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">取消</button><button class="btn danger" data-m="del">確定刪除</button></div>`,
+        async m=>{ if(m!=='del') return;
+          try{ await store.removeRoom(code); }catch{ toast('刪除失敗，請檢查網路'); return; }
+          lsSet('sk-rooms',(lsGet('sk-rooms')||[]).filter(r=>r.code!==code));
+          if(S.screen==='teacher'){ S.unwatch&&S.unwatch(); location.href=location.href.split('?')[0].split('#')[0]; return; }
+          closeModal(); toast('已刪除'); });
+    }
     case 'qr': {
       const base=location.href.split('?')[0].split('#')[0];
       const url=base+'?room='+S.code;
@@ -455,7 +472,7 @@ document.addEventListener('click', async e=>{
       let code; do{ code=genCode(); } while(await store.exists(code));
       const key=uid();
       await store.create(code,{ meta:{ createdAt:Date.now(), phase:1, key, image:'' } });
-      const rec=lsGet('sk-rooms')||[]; rec.unshift({code,key,t:Date.now()}); lsSet('sk-rooms',rec.slice(0,20));
+      const rec=lsGet('sk-rooms')||[]; rec.unshift({code,key,t:Date.now()}); lsSet('sk-rooms',rec.slice(0,30));
       location.search='?teach='+code+'&k='+key; return;
     }
   }
