@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>故事九宮格</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#F6F1E7;--paper:#FFFDF8;--ink:#2B2A28;--muted:#7A736B;--line:#E3D8C6;
+  --cre:#E0952A;--cre-bg:#FFF0D6;--cre-ink:#8A5208;
+  --gen:#3A81C2;--gen-bg:#E3EFFA;--gen-ink:#1E4B76;
+  --lock:#ECE5D8;--danger:#C2452F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+
+#demoBar{background:#2B2A28;color:#fff;padding:8px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+#demoBar button{background:#4A4743;border:none;color:#fff;border-radius:999px;padding:6px 12px;cursor:pointer}
+#demoBar button.on{background:#fff;color:#2B2A28;font-weight:700}
+
+.topbar{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{font-weight:700;font-size:18px;margin-right:4px}
+.sp{flex:1}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:15px;cursor:pointer}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab:disabled{opacity:.4;cursor:not-allowed}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.b-cre{background:var(--cre-bg);color:var(--cre-ink)}
+.b-gen{background:var(--gen-bg);color:var(--gen-ink)}
+.code{font-weight:700;letter-spacing:.12em;background:#F0E9DC;border-radius:8px;padding:4px 10px}
+
+main{padding:14px 16px 40px;max-width:1240px;margin:0 auto}
+.banner{background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:15px}
+
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cell{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:170px}
+.cell.center{border:2px solid var(--ink)}
+.cell.locked{background:var(--lock)}
+.cell-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.cell-title{font-weight:700;font-size:17px}
+.add{width:38px;height:38px;flex:none;border-radius:50%;border:none;background:var(--ink);color:#fff;font-size:24px;line-height:1;cursor:pointer}
+.cell-q{font-size:14px;line-height:1.5;margin:0}
+.cell-tip{font-size:12.5px;color:var(--muted);margin:0}
+.cell-ch{font-size:12.5px;border-radius:8px;padding:4px 8px;margin:0;line-height:1.45}
+.compact .guide{display:none}
+.notes{display:flex;flex-direction:column;gap:6px}
+.note{border-radius:10px;padding:8px 10px;font-size:15px;line-height:1.45;border-left:5px solid;word-break:break-word;text-align:left;width:100%;border-top:none;border-right:none;border-bottom:none}
+.note[data-act]{cursor:pointer}
+.n-cre{background:var(--cre-bg);border-color:var(--cre)}
+.n-gen{background:var(--gen-bg);border-color:var(--gen)}
+.note .meta{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:3px}
+.note.mine .who{font-weight:700;color:var(--ink)}
+.tag{background:rgba(0,0,0,.06);border-radius:6px;padding:0 5px}
+.cardimg{width:100%;border-radius:10px;display:block;background:#E8E0D2;aspect-ratio:4/3;object-fit:contain;cursor:zoom-in}
+.noimg{aspect-ratio:4/3;border-radius:10px;background:#EFE8DB;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.lockmsg{font-size:14px;color:var(--muted);text-align:center;margin:auto}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.boardTitle{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:17px}
+
+.story{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.step{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.step-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{border-radius:10px;border:2px solid transparent;padding:6px 10px;font-size:14.5px;cursor:pointer;text-align:left}
+.chip.n-cre{background:var(--cre-bg)} .chip.n-gen{background:var(--gen-bg)}
+.chip.sel{border-color:var(--ink);font-weight:700}
+.story-input{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:15px;resize:vertical;background:#fff}
+.outline{position:sticky;top:76px;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:14px}
+.outline h3{margin:0 0 8px}
+.outline ol{margin:0;padding-left:1.4em;line-height:1.7}
+.outline .empty{color:var(--muted)}
+.ext{margin-top:12px;background:#F1EADD;border-radius:10px;padding:10px;font-size:14px}
+
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.scard{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px}
+.scard ol{margin:6px 0 0;padding-left:1.3em;line-height:1.6;font-size:14.5px}
+
+.home{max-width:520px;margin:40px auto;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px}
+.home h1{margin:0 0 6px;font-size:24px}
+.field{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin:8px 0 14px}
+.gpick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 16px}
+.gpick button{border-radius:14px;border:3px solid transparent;padding:18px 8px;font-size:18px;font-weight:700;cursor:pointer}
+.gpick .sel{border-color:var(--ink)}
+
+.modal{position:fixed;inset:0;background:rgba(30,28,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.mbox{background:var(--paper);border-radius:16px;padding:18px;width:min(520px,100%);max-height:92vh;overflow:auto}
+.mbox h3{margin:0 0 8px}
+.mbox textarea{width:100%;font:inherit;font-size:17px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:10px;resize:vertical}
+.mbtns{display:flex;gap:8px;margin-top:12px;align-items:center}
+.mbig{width:min(1000px,100%)}
+.mbig img{width:100%;border-radius:10px}
+#qr{display:flex;justify-content:center;margin:12px 0}
+.bigcode{font-size:40px;font-weight:700;letter-spacing:.2em;text-align:center}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;z-index:30;font-size:15px}
+
+@media (max-width:760px){
+  .board{grid-template-columns:1fr}
+  .cell.center{order:-1}
+  .two,.story{grid-template-columns:1fr}
+  .outline{position:static}
+}
+@media print{
+  #demoBar,.topbar,.banner,.add{display:none!important}
+  body{background:#fff}
+  .two{grid-template-columns:1fr}
+  .board,.cell,.scard{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div id="demoBar" class="hidden"></div>
+<div id="app"></div>
+<div id="modal" class="modal hidden"></div>
+
+<script>
+/* ===== 設定：把 Firebase 設定貼在這裡（null = 示範模式）===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCdX2qYruIQrd6XmHzSYQTfxeITcR5JI7o",
+  authDomain: "story-grid.firebaseapp.com",
+  databaseURL: "https://story-grid-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "story-grid",
+  storageBucket: "story-grid.firebasestorage.app",
+  messagingSenderId: "629576888566",
+  appId: "1:629576888566:web:ec86365a281e7c4dd13cd7"
+};
+// 加上 ?demo 可進入示範模式
+const DEMO = new URLSearchParams(location.search).has('demo');
+/* ========================================================= */
+
+
+const GROUPS = { cre: { name: '創造力組' }, gen: { name: '一般智能組' } };
+const otherG = g => (g === 'cre' ? 'gen' : 'cre');
+const CELLS = {
+  hero:   { t:'主角', q:'故事中最重要的是誰？他有什麼特別之處？', tip:'可以想：身分／個性／特殊能力',
+            ch:{ cre:'想一個跟別人都不一樣的主角，越特別越好！', gen:'從圖卡上哪個線索，看得出他是誰？' } },
+  scene:  { t:'場景', q:'故事發生在哪裡？那裡有什麼特別？', tip:'可以想：地點／時間／氣氛',
+            ch:{ cre:'替這個地方加一個別人想不到的細節。', gen:'圖上哪裡看得出時間或地點？' } },
+  item:   { t:'重要物件', q:'圖中哪個東西會影響故事？它有什麼用途或祕密？', tip:'可以想：藥水／筆記本／照片',
+            ch:{ cre:'這個東西還可以有什麼意想不到的用法？', gen:'這個東西跟主角有什麼關係？' } },
+  wish:   { t:'願望', q:'主角最想完成什麼？為什麼這件事對他很重要？', tip:'可以想：得到／完成／改變',
+            ch:{ cre:'想一個很不一樣、很少人會想到的願望。', gen:'他為什麼想要這個？跟前面哪一格有關？' } },
+  center: { t:'中央圖卡', q:'仔細觀察圖卡，先找出三個看得到的線索。', tip:'暫時不要急著決定答案。',
+            ch:{ cre:'還有哪些小地方，是別人沒注意到的？', gen:'每個線索，說說你在圖的哪裡看到。' } },
+  problem:{ t:'問題', q:'發生了什麼麻煩，讓主角沒辦法立刻完成願望？', tip:'可以想：缺少／拿錯／被阻止',
+            ch:{ cre:'麻煩越意外越好！', gen:'這個麻煩是怎麼造成的？跟哪一格有關？' } },
+  help:   { t:'幫助', q:'誰或什麼可能幫助主角？也可能是不小心幫倒忙。', tip:'可以想：人物／動物／物件',
+            ch:{ cre:'幫手可以很奇怪，甚至越幫越忙。', gen:'這個幫手為什麼剛好會出現？' } },
+  twist:  { t:'轉折', q:'沒想到發生了什麼事？哪個發現讓故事改變方向？', tip:'可以想：真相／誤會／結果相反',
+            ch:{ cre:'想一個讀者完全猜不到的發展。', gen:'這個轉折跟哪個線索有關？要說得通。' } },
+  ending: { t:'結局', q:'最後事情變成怎樣？主角得到、失去或明白了什麼？', tip:'可以想：成功／失敗／新的開始',
+            ch:{ cre:'想一個出乎意料的結局。', gen:'結局有沒有回應主角的願望？' } },
+};
+const GRID = ['hero','scene','item','wish','center','problem','help','twist','ending'];
+const STORY = ['hero','scene','item','wish','problem','help','twist','ending'];
+const PHASES = { 1:'① 觀察圖卡', 2:'② 九宮格發想', 3:'③ 拼故事' };
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+function genCode(){ const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c=''; for(let i=0;i<4;i++) c+=a[Math.floor(Math.random()*a.length)]; return c; }
+function compressImage(file){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{ const max=1280; const r=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas'); c.width=Math.round(img.width*r); c.height=Math.round(img.height*r);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src); res(c.toDataURL('image/jpeg',0.8)); };
+    img.onerror=rej; img.src=URL.createObjectURL(file);
+  });
+}
+
+/* ---------- stores ---------- */
+function setPath(obj, parts, val){
+  let o=obj; for(let i=0;i<parts.length-1;i++){ if(o[parts[i]]==null||typeof o[parts[i]]!=='object') o[parts[i]]={}; o=o[parts[i]]; }
+  const k=parts[parts.length-1]; if(val==null) delete o[k]; else o[k]=val;
+}
+function memStore(){
+  const db={}; const ls={};
+  const emit=c=>setTimeout(()=>(ls[c]||[]).forEach(cb=>cb(db[c]?JSON.parse(JSON.stringify(db[c])):null)),0);
+  return {
+    async exists(c){ return !!db[c]; },
+    async create(c,o){ db[c]=o; emit(c); },
+    watch(c,cb){ (ls[c]=ls[c]||[]).push(cb); emit(c); return ()=>{ ls[c]=ls[c].filter(f=>f!==cb); }; },
+    async set(c,p,v){ if(!db[c]) db[c]={}; setPath(db[c],p.split('/'),v); emit(c); },
+    async remove(c,p){ setPath(db[c],p.split('/'),null); emit(c); },
+    newId: uid,
+  };
+}
+function fbStore(){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const d=firebase.database(); const R=c=>d.ref('rooms/'+c);
+  return {
+    async exists(c){ return (await R(c).child('meta').get()).exists(); },
+    create:(c,o)=>R(c).set(o),
+    watch(c,cb){ const h=s=>cb(s.val()); R(c).on('value',h); return ()=>R(c).off('value',h); },
+    set:(c,p,v)=>R(c).child(p).set(v),
+    remove:(c,p)=>R(c).child(p).remove(),
+    newId:()=>d.ref().push().key,
+  };
+}
+
+/* ---------- state ---------- */
+let store;
+const S = { screen:'loading', code:null, me:null, room:null, view:'mine', tTab:'boards', compact:false, teacherKey:null, unwatch:null, pending:false, joinGroup:null };
+const phase = () => S.room?.meta?.phase || 1;
+const notesArr = () => Object.entries(S.room?.notes || {}).map(([id,n])=>({id,...n})).sort((a,b)=>a.ts-b.ts);
+const notesOf = g => notesArr().filter(n=>n.group===g);
+
+function watchRoom(code){
+  S.unwatch && S.unwatch();
+  S.code=code;
+  S.unwatch=store.watch(code, r=>{ S.room=r; render(); });
+}
+
+/* ---------- render ---------- */
+function render(){
+  const ae=document.activeElement;
+  if(ae && ae.classList && ae.classList.contains('story-input')){ S.pending=true; return; }
+  const app=$('#app');
+  if(S.screen==='loading'){ app.innerHTML='<div class="home">載入中…</div>'; return; }
+  if(S.screen==='home') return renderHome(app);
+  if(S.screen==='join') return renderJoin(app);
+  if(S.screen==='msg'){ app.innerHTML=`<div class="home">${S.msg}</div>`; return; }
+  if(S.code && S.room===null && S.screen!=='msg'){ app.innerHTML='<div class="home"><h1>找不到這個活動</h1><p class="muted">請確認 QR code 或房間代碼是否正確。</p></div>'; return; }
+  if(!S.room){ app.innerHTML='<div class="home">連線中…</div>'; return; }
+  if(S.screen==='teacher'){
+    if(!DEMO && S.room.meta?.key!==S.teacherKey){ app.innerHTML='<div class="home"><h1>這是老師專用連結</h1><p class="muted">連結不完整，請用建立活動時的老師連結開啟。</p></div>'; return; }
+    return renderTeacher(app);
+  }
+  if(S.screen==='student') return renderStudent(app);
+}
+
+function imgHTML(){
+  const src=S.room?.meta?.image;
+  return src ? `<img class="cardimg" src="${src}" alt="中央圖卡" data-act="zoom">` : `<div class="noimg">老師還沒放圖卡</div>`;
+}
+
+function noteHTML(n, opt){
+  const mine = S.me && n.author===S.me.id;
+  let act='';
+  if(opt.editable && mine) act='edit';
+  else if(opt.teacher) act='tdel';
+  else if(opt.borrow) act='borrow';
+  const borrowed = opt.borrow && S.me && notesArr().some(x=>x.srcId===n.id && x.group===S.me.group);
+  return `<button class="note n-${n.group} ${mine?'mine':''}" ${act?`data-act="${act}" data-id="${n.id}"`:'disabled'}>
+    ${esc(n.text)}
+    <span class="meta"><span class="who">${mine?'我':esc(n.name)}</span>${n.borrowedFrom?`<span class="tag">借自${GROUPS[n.borrowedFrom].name}</span>`:''}${borrowed?'<span class="tag">✓ 已借用</span>':''}</span>
+  </button>`;
+}
+
+function boardHTML(g, opt={}){
+  const notes=notesOf(g); const ph=phase();
+  return `<div class="board ${opt.compact?'compact':''}">` + GRID.map(id=>{
+    const c=CELLS[id]; const locked = !opt.teacher && id!=='center' && ph<2;
+    const list=notes.filter(n=>n.cell===id);
+    return `<section class="cell ${id==='center'?'center':''} ${locked?'locked':''}">
+      <div class="cell-head"><span class="cell-title">${c.t}${opt.teacher?` <span class="muted" style="font-weight:400;font-size:13px">${list.length}</span>`:''}</span>
+        ${opt.editable && !locked ? `<button class="add" data-act="add" data-cell="${id}" aria-label="新增想法">＋</button>`:''}</div>
+      ${id==='center'?imgHTML():''}
+      <div class="guide"><p class="cell-q">${c.q}</p><p class="cell-tip">${c.tip}</p>
+        ${locked?'':`<p class="cell-ch b-${g}">${GROUPS[g].name}挑戰：${c.ch[g]}</p>`}</div>
+      ${locked?'<div class="lockmsg">🔒 等老師開放</div>':`<div class="notes">${list.map(n=>noteHTML(n,opt)).join('')}</div>`}
+    </section>`;
+  }).join('') + `</div>`;
+}
+
+function renderTeacher(app){
+  const ph=phase(); const stories=Object.keys(S.room.stories||{}).length;
+  app.innerHTML=`
+  <div class="topbar">
+    <span class="brand">故事九宮格</span><span class="code">${esc(S.code)}</span>
+    <button class="btn" data-act="qr">顯示 QR code</button>
+    <div class="tabs">${[1,2,3].map(p=>`<button class="tab ${ph===p?'on':''}" data-act="phase" data-p="${p}">${PHASES[p]}</button>`).join('')}</div>
+    <span class="sp"></span>
+    <label class="btn">上傳圖卡<input type="file" accept="image/*" id="imgUp" hidden></label>
+    <button class="btn" data-act="print">列印／存 PDF</button>
+  </div>
+  <main>
+    <div class="tabs" style="margin-bottom:12px">
+      <button class="tab ${S.tTab==='boards'?'on':''}" data-act="ttab" data-t="boards">兩組九宮格</button>
+      <button class="tab ${S.tTab==='stories'?'on':''}" data-act="ttab" data-t="stories">學生的故事（${stories}）</button>
+      ${S.tTab==='boards'?`<button class="tab ${S.compact?'on':''}" data-act="compact">投影精簡（隱藏引導語）</button>`:''}
+    </div>
+    ${S.tTab==='boards' ? `<div class="two">
+      <div><h2 class="boardTitle"><span class="badge b-cre">創造力組</span></h2>${boardHTML('cre',{teacher:true,compact:S.compact})}</div>
+      <div><h2 class="boardTitle"><span class="badge b-gen">一般智能組</span></h2>${boardHTML('gen',{teacher:true,compact:S.compact})}</div>
+    </div><p class="muted" style="font-size:13px">點任何一張便利貼可以刪除不適當的內容。</p>` : storiesHTML()}
+  </main>`;
+  $('#imgUp').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const d=await compressImage(f); await store.set(S.code,'meta/image',d); toast('圖卡已更新'); }catch{ toast('圖片讀取失敗'); } };
+}
+
+function storiesHTML(){
+  const list=Object.values(S.room.stories||{}).sort((a,b)=>(a.name||'').localeCompare(b.name||'','zh-Hant'));
+  if(!list.length) return '<div class="banner">還沒有學生開始拼故事。切換到「③ 拼故事」後，學生就能開始。</div>';
+  return `<div class="scards">${list.map(s=>{ const picks=s.picks||{}; const done=STORY.filter(id=>picks[id]?.text).length;
+    return `<div class="scard"><div style="display:flex;gap:8px;align-items:center"><b>${esc(s.name)}</b><span class="badge b-${s.group}">${GROUPS[s.group]?.name||''}</span><span class="sp"></span><span class="muted">${done}/8</span></div>
+    <ol>${STORY.map(id=>`<li><b>${CELLS[id].t}</b>：${picks[id]?.text?esc(picks[id].text):'<span class="muted">—</span>'}</li>`).join('')}</ol></div>`; }).join('')}</div>`;
+}
+
+function renderStudent(app){
+  const ph=phase(); const g=S.me.group; const og=otherG(g);
+  if(S.view==='story' && ph<3) S.view='mine';
+  let body='';
+  if(S.view==='mine'){
+    body = (ph===1?`<div class="banner">👀 先觀察中間的圖卡，在「中央圖卡」那格寫下你看到的線索。其他格子等老師開放。</div>`:'')
+         + boardHTML(g,{editable:true});
+  } else if(S.view==='other'){
+    body = `<div class="banner">這是 <span class="badge b-${og}">${GROUPS[og].name}</span> 的想法。覺得不錯就點一下，借到我們組。</div>` + boardHTML(og,{borrow:true});
+  } else body = storyHTML();
+  app.innerHTML=`
+  <div class="topbar">
+    <span class="brand">故事九宮格</span>
+    <span class="badge b-${g}">${esc(S.me.name)}・${GROUPS[g].name}</span>
+    <span class="muted" style="font-size:14px">${PHASES[ph]}</span>
+    <span class="sp"></span>
+    <div class="tabs">
+      <button class="tab ${S.view==='mine'?'on':''}" data-act="view" data-v="mine">我們這組</button>
+      <button class="tab ${S.view==='other'?'on':''}" data-act="view" data-v="other">看看${GROUPS[og].name}</button>
+      <button class="tab ${S.view==='story'?'on':''}" data-act="view" data-v="story" ${ph<3?'disabled title="等老師開放"':''}>${ph<3?'🔒 ':''}拼我的故事</button>
+    </div>
+  </div>
+  <main>${body}</main>`;
+}
+
+function myStory(){ return S.room.stories?.[S.me.id] || { name:S.me.name, group:S.me.group, picks:{} }; }
+function storyHTML(){
+  const st=myStory(); const picks=st.picks||{}; const all=notesArr();
+  const done=STORY.filter(id=>picks[id]?.text).length;
+  const steps=STORY.map((id,i)=>{ const c=CELLS[id]; const opts=all.filter(n=>n.cell===id); const p=picks[id]||{};
+    return `<section class="step"><div class="step-h"><span class="num">${i+1}</span><b>${c.t}</b><span class="muted" style="font-size:13.5px">${c.q}</span></div>
+      <div class="chips">${opts.length?opts.map(n=>`<button class="chip n-${n.group} ${p.noteId===n.id?'sel':''}" data-act="pick" data-cell="${id}" data-id="${n.id}">${esc(n.text)}</button>`).join(''):'<span class="muted" style="font-size:14px">這一格還沒有人貼，可以自己寫</span>'}</div>
+      <textarea class="story-input" data-cell="${id}" rows="2" maxlength="100" placeholder="點上面一張，或用自己的話寫、改一改">${esc(p.text||'')}</textarea></section>`;
+  }).join('');
+  return `<div class="banner">兩組的想法都可以用。每一格挑一張（<span class="badge b-cre">創造力組</span> <span class="badge b-gen">一般智能組</span>），再用自己的話改一改，拼成你自己的故事。</div>
+  <div class="story"><div>${steps}</div>
+  <aside class="outline"><h3>我的故事大綱 <span class="muted" style="font-size:14px;font-weight:400">${done}/8</span></h3>
+    <ol>${STORY.map(id=>`<li><b>${CELLS[id].t}</b>：${picks[id]?.text?esc(picks[id].text):'<span class="empty">還沒選</span>'}</li>`).join('')}</ol>
+    ${done===8?`<div class="ext">🌟 <b>完成了！挑戰一下：</b>挑一格，換成另一組的點子。換掉之後，後面哪幾格也要跟著改？</div>`:''}
+  </aside></div>`;
+}
+async function saveStory(cell, data){
+  const st=myStory(); const picks={...(st.picks||{})};
+  if(data===null) delete picks[cell]; else picks[cell]=data;
+  await store.set(S.code,'stories/'+S.me.id,{ name:S.me.name, group:S.me.group, picks, ts:Date.now() });
+}
+
+function renderHome(app){
+  const recent=lsGet('sk-rooms')||[];
+  app.innerHTML=`<div class="home"><h1>故事九宮格</h1><p class="muted">建立一個活動，學生掃 QR code 就能加入。</p>
+    <button class="btn primary" data-act="create" style="font-size:17px;padding:12px 18px">建立新活動</button>
+    ${recent.length?`<h3 style="margin-top:24px">最近的活動</h3>${recent.slice(0,8).map(r=>`<p><a href="?teach=${esc(r.code)}&k=${esc(r.key)}">${esc(r.code)}</a> <span class="muted">${new Date(r.t).toLocaleString('zh-TW')}</span></p>`).join('')}`:''}
+  </div>`;
+}
+function renderJoin(app){
+  app.innerHTML=`<div class="home"><h1>加入故事九宮格</h1><p class="muted">活動代碼 <span class="code">${esc(S.code)}</span></p>
+    <label>你的名字或座號<input class="field" id="jName" maxlength="12" placeholder="例如：12 小明"></label>
+    <div>你是哪一組？</div>
+    <div class="gpick"><button class="b-cre ${S.joinGroup==='cre'?'sel':''}" data-act="jg" data-g="cre">創造力組</button><button class="b-gen ${S.joinGroup==='gen'?'sel':''}" data-act="jg" data-g="gen">一般智能組</button></div>
+    <button class="btn primary" data-act="join" style="width:100%;font-size:17px;padding:12px">進入</button></div>`;
+}
+
+/* ---------- modal ---------- */
+let modalHandler=null;
+function openModal(html, handler, big){ const m=$('#modal'); m.innerHTML=`<div class="mbox ${big?'mbig':''}">${html}</div>`; m.classList.remove('hidden'); modalHandler=handler||null; }
+function closeModal(){ $('#modal').classList.add('hidden'); $('#modal').innerHTML=''; modalHandler=null; if(S.pending){ S.pending=false; } render(); }
+$('#modal').addEventListener('click',e=>{
+  if(e.target.id==='modal') return closeModal();
+  const b=e.target.closest('[data-m]'); if(!b) return;
+  if(b.dataset.m==='cancel') return closeModal();
+  modalHandler && modalHandler(b.dataset.m);
+});
+
+function noteModal(cell, note){
+  const c=CELLS[cell]; const g=S.me.group;
+  openModal(`<h3>${c.t}</h3><p class="cell-q">${c.q}</p><p class="cell-tip">${c.tip}</p><p class="cell-ch b-${g}" style="margin-top:6px">${GROUPS[g].name}挑戰：${c.ch[g]}</p>
+    <textarea id="noteText" maxlength="80" rows="3" placeholder="寫下你的想法…">${note?esc(note.text):''}</textarea>
+    <div class="mbtns">${note?'<button class="btn danger" data-m="del">刪除</button>':''}<span class="sp"></span><button class="btn" data-m="cancel">取消</button><button class="btn primary" data-m="save">${note?'儲存':'貼上'}</button></div>`,
+  async m=>{
+    if(m==='del'){ await store.remove(S.code,'notes/'+note.id); return closeModal(); }
+    if(m==='save'){
+      const text=$('#noteText').value.trim(); if(!text){ toast('還沒寫內容喔'); return; }
+      if(note) await store.set(S.code,'notes/'+note.id+'/text',text);
+      else await store.set(S.code,'notes/'+store.newId(),{ group:g, cell, text, author:S.me.id, name:S.me.name, ts:Date.now() });
+      closeModal();
+    }
+  });
+  setTimeout(()=>$('#noteText')?.focus(),50);
+}
+
+/* ---------- actions ---------- */
+document.addEventListener('click', async e=>{
+  const b=e.target.closest('[data-act]'); if(!b || b.closest('#modal')) return;
+  const a=b.dataset.act; const notes=()=>Object.fromEntries(notesArr().map(n=>[n.id,n]));
+  switch(a){
+    case 'add': return noteModal(b.dataset.cell, null);
+    case 'edit': { const n=notes()[b.dataset.id]; if(n) noteModal(n.cell,n); return; }
+    case 'borrow': {
+      const n=notes()[b.dataset.id]; if(!n) return;
+      if(phase()<2 && n.cell!=='center'){ toast('這一格還沒開放'); return; }
+      if(notesArr().some(x=>x.srcId===n.id && x.group===S.me.group)){ toast('已經借過這張了'); return; }
+      return openModal(`<h3>借到我們組？</h3><div class="note n-${n.group}">${esc(n.text)}</div><p class="muted">會貼到 ${GROUPS[S.me.group].name} 的「${CELLS[n.cell].t}」，標示「借自${GROUPS[n.group].name}」。借過來之後可以再改。</p>
+        <div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">取消</button><button class="btn primary" data-m="ok">借過來</button></div>`,
+        async m=>{ if(m!=='ok') return; await store.set(S.code,'notes/'+store.newId(),{ group:S.me.group, cell:n.cell, text:n.text, author:S.me.id, name:S.me.name, ts:Date.now(), borrowedFrom:n.group, srcId:n.id }); closeModal(); toast('借好了！'); });
+    }
+    case 'tdel': { const n=notes()[b.dataset.id]; if(!n) return;
+      return openModal(`<h3>${CELLS[n.cell].t}・${esc(n.name)}</h3><div class="note n-${n.group}">${esc(n.text)}</div>
+        <div class="mbtns"><button class="btn danger" data-m="del">刪除這張</button><span class="sp"></span><button class="btn" data-m="cancel">關閉</button></div>`,
+        async m=>{ if(m==='del'){ await store.remove(S.code,'notes/'+n.id); closeModal(); } }); }
+    case 'zoom': return openModal(`<img src="${S.room.meta.image}" alt="中央圖卡"><div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">關閉</button></div>`, null, true);
+    case 'view': S.view=b.dataset.v; window.scrollTo(0,0); return render();
+    case 'ttab': S.tTab=b.dataset.t; return render();
+    case 'compact': S.compact=!S.compact; return render();
+    case 'phase': return store.set(S.code,'meta/phase',Number(b.dataset.p));
+    case 'print': return window.print();
+    case 'qr': {
+      const base=location.href.split('?')[0].split('#')[0];
+      const url=base+'?room='+S.code;
+      openModal(`<h3 style="text-align:center">掃描加入</h3><div id="qr"></div><div class="bigcode">${esc(S.code)}</div>
+        <p class="muted" style="text-align:center;word-break:break-all;font-size:13px">${esc(url)}</p>
+        ${DEMO?'<p class="muted" style="text-align:center;font-size:13px">（示範模式：這個 QR code 只是讓你看樣子，正式版掃了才能加入）</p>':''}
+        <div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">關閉</button></div>`, null, true);
+      if(window.QRCode) new QRCode($('#qr'),{ text:url, width:340, height:340, correctLevel:QRCode.CorrectLevel.M }); else $('#qr').textContent='（QR code 元件載入失敗，請用網址加入）';
+      return;
+    }
+    case 'pick': {
+      const n=notes()[b.dataset.id]; if(!n) return;
+      const cur=myStory().picks?.[n.cell];
+      if(cur && cur.noteId===n.id) return saveStory(n.cell,null);
+      return saveStory(n.cell,{ noteId:n.id, text:n.text });
+    }
+    case 'jg': S.joinGroup=b.dataset.g; { const nm=$('#jName')?.value; render(); if(nm) $('#jName').value=nm; } return;
+    case 'join': {
+      const name=$('#jName').value.trim(); if(!name) return toast('請先寫名字或座號');
+      if(!S.joinGroup) return toast('請選你的組別');
+      S.me={ id:uid(), name, group:S.joinGroup }; lsSet('sk-me-'+S.code,S.me);
+      S.screen='student'; return render();
+    }
+    case 'create': {
+      let code; do{ code=genCode(); } while(await store.exists(code));
+      const key=uid();
+      await store.create(code,{ meta:{ createdAt:Date.now(), phase:1, key, image:'' } });
+      const rec=lsGet('sk-rooms')||[]; rec.unshift({code,key,t:Date.now()}); lsSet('sk-rooms',rec.slice(0,20));
+      location.search='?teach='+code+'&k='+key; return;
+    }
+  }
+});
+document.addEventListener('focusout', e=>{
+  const t=e.target; if(!t.classList || !t.classList.contains('story-input')) return;
+  const cell=t.dataset.cell; const val=t.value.trim(); const cur=myStory().picks?.[cell];
+  setTimeout(async ()=>{
+    if((cur?.text||'')!==val) await saveStory(cell, val?{ noteId:cur?.noteId||null, text:val }:null);
+    if(S.pending){ S.pending=false; render(); }
+  },0);
+});
+
+/* ---------- demo ---------- */
+const DEMO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+<rect width="800" height="600" fill="#EAD9BC"/><rect y="430" width="800" height="170" fill="#B98B5E"/>
+<rect x="470" y="60" width="260" height="230" rx="8" fill="#1F2B4D" stroke="#7A5A3A" stroke-width="14"/>
+<circle cx="640" cy="130" r="34" fill="#F6E7A8"/><circle cx="655" cy="122" r="30" fill="#1F2B4D"/>
+<g fill="#F6E7A8"><circle cx="520" cy="110" r="3"/><circle cx="560" cy="200" r="2.5"/><circle cx="690" cy="230" r="3"/><circle cx="600" cy="90" r="2"/></g>
+<path d="M455 50 Q470 180 440 300 L480 300 Q500 170 482 50Z" fill="#9C3B3B"/>
+<path d="M466 300 q-6 30 10 44 q14 10 22 -6" fill="none" stroke="#3B3B3B" stroke-width="8" stroke-linecap="round"/>
+<rect x="80" y="330" width="420" height="24" rx="4" fill="#7A5A3A"/><rect x="100" y="354" width="18" height="140" fill="#6A4C30"/><rect x="460" y="354" width="18" height="140" fill="#6A4C30"/>
+<path d="M150 250 h40 v20 q34 18 30 60 h-100 q-4 -42 30 -60z" fill="#8FE3B0" opacity=".9"/><rect x="152" y="236" width="36" height="16" rx="3" fill="#7A5A3A"/>
+<circle cx="170" cy="300" r="70" fill="#8FE3B0" opacity=".18"/>
+<g transform="translate(270 300) rotate(-6)"><rect width="150" height="32" rx="3" fill="#FFFDF3" stroke="#B8A888"/><line x1="75" y1="0" x2="75" y2="32" stroke="#B8A888"/>
+<g stroke="#9A8C70" stroke-width="2"><line x1="10" y1="10" x2="62" y2="10"/><line x1="10" y1="20" x2="50" y2="20"/><line x1="88" y1="10" x2="140" y2="10"/></g></g>
+<rect x="430" y="300" width="46" height="30" rx="3" fill="#5B4A3A" transform="rotate(8 453 315)"/>
+<g transform="translate(560 520) rotate(25)"><circle r="12" fill="none" stroke="#D8B24A" stroke-width="6"/><rect x="10" y="-3" width="42" height="6" fill="#D8B24A"/><rect x="40" y="3" width="6" height="10" fill="#D8B24A"/></g>
+<g fill="#6E6A66" opacity=".7"><ellipse cx="270" cy="470" rx="10" ry="5"/><ellipse cx="300" cy="490" rx="10" ry="5"/><ellipse cx="330" cy="470" rx="10" ry="5"/><ellipse cx="360" cy="490" rx="10" ry="5"/></g>
+</svg>`;
+const DEMO_IDS = { teacher:null, s1:{ id:'s1', name:'小創', group:'cre' }, s2:{ id:'s2', name:'小智', group:'gen' } };
+async function seedDemo(){
+  const img='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(DEMO_SVG);
+  const n=(group,cell,text,author,name,ts,extra={})=>({group,cell,text,author,name,ts,...extra});
+  await store.create('DEMO',{ meta:{ phase:2, image:img, key:'demo', createdAt:Date.now() }, notes:{
+    a1:n('cre','center','桌上的瓶子在發光','s1','小創',1),
+    a2:n('gen','center','窗外有月亮，應該是晚上（右上角窗戶）','s2','小智',2),
+    a3:n('gen','center','地上有一串腳印走向門口','x3','阿哲',3),
+    a4:n('cre','hero','一個聽得懂貓說話的女孩','x4','小芸',4),
+    a5:n('gen','hero','住在這個房間的孩子，因為書桌上有攤開的筆記本','s2','小智',5),
+    a6:n('gen','problem','筆記本最後一頁被撕掉了','x3','阿哲',6),
+    a7:n('cre','item','發光藥水喝了會變得跟貓一樣小','s1','小創',7),
+    a8:n('cre','center','地上有一串腳印走向門口','s1','小創',8,{ borrowedFrom:'gen', srcId:'a3' }),
+  }});
+}
+function renderDemoBar(){
+  const bar=$('#demoBar'); bar.classList.remove('hidden');
+  const cur=S.screen==='teacher'?'teacher':S.me?.id;
+  bar.innerHTML=`<b>示範模式</b><span style="opacity:.75">（資料只在這個頁面，重新整理就清空）切換身分：</span>
+    <button class="${cur==='teacher'?'on':''}" data-demo="teacher">老師（投影畫面）</button>
+    <button class="${cur==='s1'?'on':''}" data-demo="s1">學生：小創（創造力組）</button>
+    <button class="${cur==='s2'?'on':''}" data-demo="s2">學生：小智（一般智能組）</button>`;
+}
+$('#demoBar').addEventListener('click',e=>{
+  const b=e.target.closest('[data-demo]'); if(!b) return;
+  const k=b.dataset.demo;
+  if(k==='teacher'){ S.screen='teacher'; S.me=null; } else { S.screen='student'; S.me=DEMO_IDS[k]; S.view='mine'; }
+  renderDemoBar(); window.scrollTo(0,0); render();
+});
+
+/* ---------- boot ---------- */
+(async function init(){
+  if(DEMO){
+    store=memStore(); await seedDemo();
+    S.screen='teacher'; renderDemoBar(); watchRoom('DEMO'); return;
+  }
+  render();
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js');
+  }catch{ S.screen='msg'; S.msg='<h1>連線元件載入失敗</h1><p class="muted">請確認網路後重新整理。</p>'; return render(); }
+  store=fbStore();
+  const q=new URLSearchParams(location.search);
+  if(q.get('teach')){ S.teacherKey=q.get('k'); S.screen='teacher'; watchRoom(q.get('teach').toUpperCase()); }
+  else if(q.get('room')){
+    const code=q.get('room').toUpperCase(); const me=lsGet('sk-me-'+code);
+    if(me){ S.me=me; S.screen='student'; } else S.screen='join';
+    watchRoom(code);
+  } else { S.screen='home'; render(); }
+})();
+</script>
+</body>
+</html>
