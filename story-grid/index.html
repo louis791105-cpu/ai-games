@@ -103,7 +103,11 @@ main{padding:14px 16px 40px;max-width:1240px;margin:0 auto}
 .mbtns{display:flex;gap:8px;margin-top:12px;align-items:center}
 .mbig{width:min(1000px,100%)}
 .mbig img{width:100%;border-radius:10px}
-#qr{display:flex;justify-content:center;margin:12px 0}
+#qr{display:flex;justify-content:center;margin:8px 0}
+#qr img,#qr canvas{max-width:100%;height:auto;background:#fff;padding:10px;border-radius:8px}
+.qrbox{width:min(440px,100%)}
+.qrbox h3{margin-bottom:0}
+.qrbox .bigcode{font-size:32px}
 .bigcode{font-size:40px;font-weight:700;letter-spacing:.2em;text-align:center}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;z-index:30;font-size:15px}
 
@@ -383,7 +387,7 @@ function renderJoin(app){
 
 /* ---------- modal ---------- */
 let modalHandler=null;
-function openModal(html, handler, big){ const m=$('#modal'); m.innerHTML=`<div class="mbox ${big?'mbig':''}">${html}</div>`; m.classList.remove('hidden'); modalHandler=handler||null; }
+function openModal(html, handler, big){ const m=$('#modal'); m.innerHTML=`<div class="mbox ${big===true?'mbig':(big||'')}">${html}</div>`; m.classList.remove('hidden'); modalHandler=handler||null; }
 function closeModal(){ $('#modal').classList.add('hidden'); $('#modal').innerHTML=''; modalHandler=null; if(S.pending){ S.pending=false; } render(); }
 $('#modal').addEventListener('click',e=>{
   if(e.target.id==='modal') return closeModal();
@@ -451,8 +455,8 @@ document.addEventListener('click', async e=>{
       openModal(`<h3 style="text-align:center">掃描加入</h3><div id="qr"></div><div class="bigcode">${esc(S.code)}</div>
         <p class="muted" style="text-align:center;word-break:break-all;font-size:13px">${esc(url)}</p>
         ${DEMO?'<p class="muted" style="text-align:center;font-size:13px">（示範模式：這個 QR code 只是讓你看樣子，正式版掃了才能加入）</p>':''}
-        <div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">關閉</button></div>`, null, true);
-      if(window.QRCode) new QRCode($('#qr'),{ text:url, width:340, height:340, correctLevel:QRCode.CorrectLevel.M }); else $('#qr').textContent='（QR code 元件載入失敗，請用網址加入）';
+        <div class="mbtns"><span class="sp"></span><button class="btn" data-m="cancel">關閉</button></div>`, null, 'qrbox');
+      const qs=Math.max(160,Math.min(300,window.innerHeight-300,window.innerWidth-100)); if(window.QRCode) new QRCode($('#qr'),{ text:url, width:qs, height:qs, correctLevel:QRCode.CorrectLevel.M }); else $('#qr').textContent='（QR code 元件載入失敗，請用網址加入）';
       return;
     }
     case 'pick': {
